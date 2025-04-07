@@ -31,5 +31,29 @@ const registerAdmin = async (req, res) => {
     }
 
 };
+//Login
+const login = async (req, res) => {
+    try {
+        const { email, senha } = req.body;
 
-module.exports = registerAdmin; 
+        //verificação se o usuario existe 
+        const usuario = await User.findOne({ email });
+        if (!usuario) {
+            return res.status(400).json({ mensagem: 'Usuário não encontrado' });
+        }
+
+        //Aqui compara a senha informada com a senha salva do cadastro 
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
+        if (!senhaValida) {
+            return res.status(400).json({ mensagem: 'Senha incorreta' });
+        }
+
+        //O login deu certo
+        return res.status(200).json({ mensagem: 'Login realizado com sucesso!' });
+
+    } catch (erro) {
+        res.status(500).json({ mensagem: 'Erro ao fazer login', erro });
+    }
+}
+
+module.exports = { registerAdmin, login };
