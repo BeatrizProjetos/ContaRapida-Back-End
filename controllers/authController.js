@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const registerAdmin = async (req, res) => {
     try {
@@ -48,12 +49,25 @@ const login = async (req, res) => {
             return res.status(400).json({ mensagem: 'Senha incorreta' });
         }
 
+        //Gera o token JWT
+        const token = jwt.sign(
+            { id: usuario._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
         //O login deu certo
-        return res.status(200).json({ mensagem: 'Login realizado com sucesso!' });
+        return res.status(200).json({
+            mensagem: 'Login realizado com sucesso!', token,
+            usuario: {
+                id: usuario._id,
+                email: usuario.email,
+            }
+        });
 
     } catch (erro) {
         res.status(500).json({ mensagem: 'Erro ao fazer login', erro });
     }
-}
+};
 
 module.exports = { registerAdmin, login };
