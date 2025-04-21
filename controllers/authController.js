@@ -26,7 +26,7 @@ const registerAdmin = async (req, res) => {
         const senhaCriptografada = await bcrypt.hash(senha, salt);
 
         //Criar o novo usuário
-        const novoUsuario = new User({ nome, email, senha, role })
+        const novoUsuario = new User({ nome, email, senha: senhaCriptografada, role });
 
         await novoUsuario.save();
 
@@ -38,6 +38,55 @@ const registerAdmin = async (req, res) => {
 
     }
 
+};
+
+
+
+const registerAtendente = async (req, res) => {
+    try {
+        const { nomeAtendente, emailAtendente, senhaAtendente, emailAdmin, senhaAdmin } = req.body;
+
+        // Faz a verificação se o Admin existe 
+        const admin = await User.findOne({ email: emailAdmin, role: 'admin'}); 
+        if (!admin){
+            return res.status(403).json({ mensagem : "Administrador não encontrado "});
+        }
+        //verifica a senha do admin 
+        const senhaValida = await bcrypt.compare(senhaAdmin, admin.senha);
+        
+        if (!senhaValida) {
+            return res.status(403).json({ mensagem: 'Senha do administrador incorreta' });
+
+        }
+
+    // verifica se a atendente já existe 
+    const atendenteExiste = await User.findOne({ email: emailAtendente });
+    if(atendenteExiste){
+        return res.status(400).json({ mensagem: 'Atendente já cadastrado(a)'})
+    }
+
+    // criptografa a senha do atendente
+    const salt = await bcrypt.genSalt(10);//; 
+    const senhaCriptografada = await bcrypt.hash(senhaAtendente, salt);
+
+    // criar o novo atendente 
+    const novoAtendente = new User ({
+        nome: nomeAtendente,
+        email: emailAtendente,
+        senha: senhaCriptografada,
+        role: 'atendente',
+        
+    });
+
+    await novoAtendente.save();
+
+    res.status(200).json({ mensagem: 'Atendente cadastrado com sucesso!'})
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ mensagem: 'Error no servidor' });
+    }
+    
 };
 //Login
 const login = async (req, res) => {
@@ -77,4 +126,4 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { registerAdmin, login };
+module.exports = { registerAdmin, registerAtendente, login };

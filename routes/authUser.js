@@ -1,11 +1,12 @@
 const express = require('express');
-const { registerAdmin, login } = require('../controllers/authController');
+const { registerAdmin, registerAtendente, login } = require('../controllers/authController');
 const authenticateUser = require('../middlewares/authenticateUser');
 
 const router = express.Router();
 
-//Rota para registrar um administrador 
+//Rota para registrar um administrador e atendente 
 router.post('/register-admin', registerAdmin);
+router.post('/register-atendente', registerAtendente);
 
 //Rota de login
 router.post('/login', login);
