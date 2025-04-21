@@ -5,28 +5,35 @@ const jwt = require('jsonwebtoken');
 const registerAdmin = async (req, res) => {
     try {
 
-        const { nome, email, senha, chaveSecreta } = req.body;
+        const { nome, email, senha, chaveSecreta, role } = req.body;
 
         //Verifica se a chave secreta está correta
-        if (chaveSecreta !== process.env.CHAVE_SECRETA) {
+        if (role === 'admin' && chaveSecreta !== process.env.CHAVE_SECRETA) {
             return res.status(403).json({ mensagem: 'Chave secreta inválida.' })
         }
 
-        const adminExiste = await User.findOne({ email });
-        if (adminExiste) {
-            return res.status(400).json({ mensagem: 'Administrador já cadastrado' });
-        }
-        //Criptografa a senha antes de salvar no banco
-        const salt = await bcrypt.genSalt(10);
-        const senhaHash = await bcrypt.hash(senha, salt);
+        const usuarioExiste = await User.findOne({ email });
 
-        //Cria o novo administrador
-        const novoUsuario = new User({ nome, email, senha: senhaHash, role: 'admin' });
+        if (usuarioExiste) {
+            if (role === 'admin')
+                return res.status(400).json({ mensagem: 'Administrador já cadastrado' });
+        } if (role == 'atendente') {
+            return res.status(400).json({ mensagem: 'Atendente já cadastrado' })
+        }
+
+        // Criptografa a senha antes de salvar no banco de dados
+        const salt = await bcrypt.genSalt(10);
+        const senhaCriptografada = await bcrypt.hash(senha, salt);
+
+        //Criar o novo usuário
+        const novoUsuario = new User({ nome, email, senha, role })
+
         await novoUsuario.save();
 
         //Retorna sucesso
-        res.status(200).json({ mensagem: 'Administrador cadastrado com sucesso!' });
+        res.status(200).json({ mensagem: 'Usuário cadastrado com sucesso!' });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ mensagem: 'Erro no servidor' });
 
     }

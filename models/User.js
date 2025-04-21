@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 //Definição do esquema do usuário no banco de dados 
 const UserSchema = new mongoose.Schema ({
@@ -9,17 +10,17 @@ const UserSchema = new mongoose.Schema ({
 });
 
 //Middleware para criptografar a senha automaticamente antes de salvar 
-userSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function (next) {
     if (!this.isModified('senha')) return next();
 
     try {
         const salt = await bcrypt.genSalt(10);
-        thos.senha = await bcrypt.hash(this.senha, salt);
+        this.senha = await bcrypt.hash(this.senha, salt);
         next();
     }   catch (error) {
         next(error);
     }
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', UserSchema);
 module.exports = User;
