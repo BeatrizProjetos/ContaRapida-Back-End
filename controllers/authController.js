@@ -52,8 +52,9 @@ const registerAtendente = async (req, res) => {
             return res.status(403).json({ mensagem : "Administrador não encontrado "});
         }
         //verifica a senha do admin 
-        const senhaValida = await bcrypt.compare(senhaAdmin, admin.senha);
         
+        const senhaValida = await bcrypt.compare(senhaAdmin, admin.senha);
+        console.log("Senha válida: ", senhaValida);
         if (!senhaValida) {
             return res.status(403).json({ mensagem: 'Senha do administrador incorreta' });
 
