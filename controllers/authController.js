@@ -24,16 +24,17 @@ const registerAdmin = async (req, res) => {
         // Criptografa a senha antes de salvar no banco de dados
         const salt = await bcrypt.genSalt(10);
         const senhaCriptografada = await bcrypt.hash(senha, salt);
-
+     
         //Criar o novo usuário
         const novoUsuario = new User({ nome, email, senha: senhaCriptografada, role });
 
         await novoUsuario.save();
 
+        
         //Retorna sucesso
         res.status(200).json({ mensagem: 'Usuário cadastrado com sucesso!' });
     } catch (error) {
-        console.log(error);
+        
         res.status(500).json({ mensagem: 'Erro no servidor' });
 
     }
@@ -54,7 +55,7 @@ const registerAtendente = async (req, res) => {
         //verifica a senha do admin 
         
         const senhaValida = await bcrypt.compare(senhaAdmin, admin.senha);
-        console.log("Senha válida: ", senhaValida);
+
         if (!senhaValida) {
             return res.status(403).json({ mensagem: 'Senha do administrador incorreta' });
 
@@ -84,7 +85,7 @@ const registerAtendente = async (req, res) => {
     res.status(200).json({ mensagem: 'Atendente cadastrado com sucesso!'})
 
     } catch (error) {
-        console.log(error);
+       
         res.status(500).json({ mensagem: 'Error no servidor' });
     }
     
